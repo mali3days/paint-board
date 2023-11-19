@@ -214,6 +214,7 @@ const Board: React.FC = () => {
         setToolType={handleToolType}
       />
       <canvas
+        className="touch-none"
         ref={setCanvasRef}
         onMouseDown={mouseDown}
         onTouchStart={handleTouchStart}

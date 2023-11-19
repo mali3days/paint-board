@@ -1,4 +1,4 @@
-import React, { useMemo, useState, MouseEvent } from 'react'
+import React, { useMemo, useState, MouseEvent, TouchEvent } from 'react'
 import { PaintBoard } from '@/utils/paintBoard'
 import { CANVAS_ELE_TYPE } from '@/utils/constants'
 import ToolPanel from '../../components/toolPanel'
@@ -90,6 +90,35 @@ const Board: React.FC = () => {
       setIsMouseDown(true)
     }
   }
+  // TODO: improve solution
+  const handleTouchStart = (event: TouchEvent<HTMLCanvasElement>) => {
+    if (board) {
+      const { clientX: x, clientY: y } = event.touches[0]
+      const position = {
+        x,
+        y
+      }
+      if (textEdit) {
+        board.addTextElement(textEdit.value, textEdit.rect)
+        textEdit.destroy()
+      }
+      switch (toolType) {
+        case CANVAS_ELE_TYPE.SELECT:
+          board.select.clickSelectElement(position)
+          break
+        case CANVAS_ELE_TYPE.FREE_DRAW:
+        case CANVAS_ELE_TYPE.ERASER:
+          if (!isPressSpace) {
+            board.recordCurrent(toolType)
+          }
+          break
+        default:
+          break
+      }
+      setIsMouseDown(true)
+    }
+  }
+
   const dbClick = (event: MouseEvent) => {
     if (board) {
       const { clientX: x, clientY: y } = event
@@ -120,6 +149,44 @@ const Board: React.FC = () => {
           case CANVAS_ELE_TYPE.FREE_DRAW:
           case CANVAS_ELE_TYPE.ERASER:
             if (isMouseDown) {
+              console.log('draw')
+              board.currentAddPosition({
+                x,
+                y
+              })
+            }
+            break
+          default:
+            break
+        }
+      }
+    }
+  }
+  // TODO: improve solution
+  const handleTouchMove = (event: TouchEvent<HTMLCanvasElement>) => {
+    console.log('TOUCH MOVE')
+    console.log()
+    const touch = event.touches[0]
+
+    if (board) {
+      const { clientX: x, clientY: y } = touch
+      if (isPressSpace && isMouseDown) {
+        board.dragCanvas({
+          x,
+          y
+        })
+      } else {
+        switch (toolType) {
+          case CANVAS_ELE_TYPE.SELECT:
+            board.select.moveSelectElement({
+              x,
+              y
+            })
+            break
+          case CANVAS_ELE_TYPE.FREE_DRAW:
+          case CANVAS_ELE_TYPE.ERASER:
+            if (isMouseDown) {
+              console.log('draw')
               board.currentAddPosition({
                 x,
                 y
@@ -149,8 +216,10 @@ const Board: React.FC = () => {
       <canvas
         ref={setCanvasRef}
         onMouseDown={mouseDown}
+        onTouchStart={handleTouchStart}
         onMouseMove={mouseMove}
         onMouseUp={mouseUp}
+        onTouchMove={handleTouchMove}
         onDoubleClick={dbClick}
       ></canvas>
       <Info />

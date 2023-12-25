@@ -289,10 +289,11 @@ export class PaintBoard {
    */
   cleanCanvas(w = Number.MAX_SAFE_INTEGER) {
     this.context.clearRect(-(w / 2), -(w / 2), w, w)
+    this.context.canvas.width += 0 // https://stackoverflow.com/questions/5103658/ipad-html5-canvas-not-refreshing/5145487#5145487
   }
 
   // 当前画笔颜色
-  currentLineColor = ['#000000']
+  currentLineColor = ['#1A1515']
   // 当前画笔宽度
   currentLineWidth = CommonWidth.W4
   // 当前画笔模式
